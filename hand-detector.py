@@ -13,6 +13,15 @@ def calculate_distance(x1, y1, x2, y2):
     distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     return distance
 
+cx, cy, cz = 0, 0, 0
+def center_point(x1, y1, z1):
+    global cx
+    cx = x1
+    global cy
+    cy = y1
+    global cz
+    cz = z1
+
 # OpenCV code to capture video from the default camera
 cap = cv2.VideoCapture(0)
 cap.set(3, 720)  # Set the width of the frame
@@ -45,50 +54,35 @@ while True:
                 yList.append(py)
                 zList.append((pz))
             
-            # # Calculate bounding box around the hand landmarks
-            # xmin, xmax = min(xList), max(xList)
-            # ymin, ymax = min(yList), max(yList)
-            # boxW, boxH = xmax - xmin, ymax - ymin
-            # bbox = xmin, ymin, boxW, boxH
-            # cx, cy = bbox[0] + (bbox[2] // 2), bbox[1] + (bbox[3] // 2)
-            
-            # # Store hand information in a dictionary
-            # myHand["lmList"] = mylmList
-            # myHand["bbox"] = bbox
-            # myHand["center"] = (cx, cy)
-            # myHand["type"] = handType.classification[0].label
-            #if you dont flip the image
-            ''' if handType.classification[0].label == "Right":
-                        myHand["type"] = "Left"
-            else:
-                        myHand["type"] = "Right"'''
             allHands.append(myHand)
             
-            # Draw landmarks and bounding box on the frame
-            # mpdraw.draw_landmarks(frame, handLms, mpHands.HAND_CONNECTIONS)
-            # cv2.rectangle(frame, (bbox[0] - 20, bbox[1] - 20), (bbox[0] + bbox[2] + 20, bbox[1] + bbox[3] + 20), (255, 0, 255), 2)
-            # cv2.putText(frame, myHand["type"], (bbox[0] - 30, bbox[1] - 30), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 255), 2)
-            
-            # Calculate and display the distance between two specific landmarks of the hand
             if mylmList != 0:
                 try:
-                    x, y = mylmList[5][1], mylmList[5][2]
-                    x2, y2 = mylmList[17][1], mylmList[17][2]
                     height = zList[0]
 
-                    x1, y1, z1 = xList[4], yList[4], zList[4]
-                    x2, y2, z2 = xList[8], yList[8], zList[8]
+                    x1 = int(xList[9])
+                    y1 = int(yList[9])
+                    z1 = int(zList[9])
 
-                    # print(f"Distance:", (math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)))
-
-                    distance =  math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+                    distance =  math.sqrt((x1 - x1)**2 + (y1 - y1)**2 + (z1 - z1)**2)
                     height = zList[5]
 
-                    print(distance, height, sep="   |   ")
+                    print(x1-cx, y1-cy, z1-cz)
 
-                    # cv2.rectangle(frame, (xmax - 80, ymin - 80), (xmax + 20, ymin - 20), (255, 0, 255), cv2.FILLED)
-                    # cv2.putText(frame, f"{int(height)}cm", (xmax - 80, ymin - 40), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 0), 2)
-          
+                    if x1 < cx and abs(cx-x1) > 50:
+                        print("Right")
+                    elif x1 > cx and abs(cx - x1) > 50:
+                        print("Left")
+
+                    if y1 < cy and abs(cy - y1) > 50:
+                        print("Forward")
+                    elif y1 > cy and abs(cy - y1) > 50:
+                        print("Backward")
+
+                    # if z1 < cz:
+                    #     print("Near")
+                    # elif z1 > cz:
+                    #     print("Far")
                 except:
                     pass
     
@@ -97,5 +91,8 @@ while True:
     
     # Exit the loop if 'q' key is pressed
     k = cv2.waitKey(1)
-    if cv2.waitKey(1) & 0xff==ord('q'):
+    if cv2.waitKey(1) & 0xff==ord('c'):
+        center_point(x1, y1, z1)
+        print("Center Point Set")
+    elif cv2.waitKey(1) & 0xff==ord('q'):
         break
